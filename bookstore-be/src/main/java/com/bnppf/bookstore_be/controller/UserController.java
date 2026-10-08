@@ -1,8 +1,8 @@
 package com.bnppf.bookstore_be.controller;
 
-import com.bnppf.bookstore_be.records.RegisterUserRequest;
-import com.bnppf.bookstore_be.records.UserResponse;
-import com.bnppf.bookstore_be.service.UserService;
+import com.bnppf.bookstore_be.records.user.RegisterUserRequest;
+import com.bnppf.bookstore_be.records.user.UserResponse;
+import com.bnppf.bookstore_be.service.user.UserService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;

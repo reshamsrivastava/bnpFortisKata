@@ -1,7 +1,7 @@
 package com.bnppf.bookstore_be.controller;
 
 import com.bnppf.bookstore_be.jpa.entity.BookEntity;
-import com.bnppf.bookstore_be.service.BookService;
+import com.bnppf.bookstore_be.service.book.BookService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
