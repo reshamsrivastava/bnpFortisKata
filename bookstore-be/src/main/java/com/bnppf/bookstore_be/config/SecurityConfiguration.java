@@ -26,16 +26,26 @@ public class SecurityConfiguration {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // 1. Allow Swagger UI, OpenAPI docs, and H2 Console
                         .requestMatchers(
                                 "/h2-console/**",
+                                "/swagger-ui",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
+                                "/webjars/**",
                                 "/v3/api-docs",
-                                "/v3/api-docs/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
+                        // 2. Allow Public Registration
+                        .requestMatchers("/api/users/register", "/api/users/register/").permitAll()
+
+                        // 3. Allow Public Book Discovery
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
-                        .anyRequest().authenticated())
+
+                        // 4. Secure all other endpoints
+                        .anyRequest().authenticated()
+                )
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
@@ -44,10 +54,8 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:8081"));
-        configuration.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of(
-                "Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
