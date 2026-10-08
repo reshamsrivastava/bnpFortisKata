@@ -16,7 +16,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @Sql(statements = {
         "DELETE FROM books WHERE isbn = '9780000000001'",
-        "INSERT INTO books (title, author, isbn, category, description, price, stock) VALUES ('Test Driven Development', 'Kent Beck', '9780000000001', 'Software', 'A test catalog entry', 31.50, 7)"
+        "INSERT INTO books (id, title, author, isbn, category, description, price, stock) "
+                + "VALUES (987654321, 'Test Driven Development', 'Kent Beck', "
+                + "'9780000000001', 'Software', 'A test catalog entry', 31.50, 7)"
 })
 @Sql(statements = "DELETE FROM books WHERE isbn = '9780000000001'",
         executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
@@ -34,5 +36,21 @@ class BookControllerIntegrationTest {
                         .value(org.hamcrest.Matchers.contains("Test Driven Development")))
                 .andExpect(jsonPath("$[?(@.isbn == '9780000000001')].price")
                         .value(org.hamcrest.Matchers.contains(31.50)));
+    }
+
+    @Test
+    void shouldReturnBookById() throws Exception {
+        mockMvc.perform(get("/api/books/{id}", 987654321))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(987654321))
+                .andExpect(jsonPath("$.isbn").value("9780000000001"))
+                .andExpect(jsonPath("$.title").value("Test Driven Development"))
+                .andExpect(jsonPath("$.price").value(31.50));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenBookIdDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/books/{id}", 987654322))
+                .andExpect(status().isNotFound());
     }
 }
