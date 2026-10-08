@@ -1,7 +1,7 @@
-package com.bnppf.bookstore_be.service;
+package com.bnppf.bookstore_be.service.user;
 
-import com.bnppf.bookstore_be.records.RegisterUserRequest;
-import com.bnppf.bookstore_be.records.UserResponse;
+import com.bnppf.bookstore_be.records.user.RegisterUserRequest;
+import com.bnppf.bookstore_be.records.user.UserResponse;
 import com.bnppf.bookstore_be.jpa.entity.UserEntity;
 import com.bnppf.bookstore_be.jpa.repository.UserRepository;
 import com.bnppf.bookstore_be.exception.UserAlreadyExistsException;

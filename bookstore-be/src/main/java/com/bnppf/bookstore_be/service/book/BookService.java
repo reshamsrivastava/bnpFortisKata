@@ -1,4 +1,4 @@
-package com.bnppf.bookstore_be.service;
+package com.bnppf.bookstore_be.service.book;
 
 
 import com.bnppf.bookstore_be.jpa.entity.BookEntity;

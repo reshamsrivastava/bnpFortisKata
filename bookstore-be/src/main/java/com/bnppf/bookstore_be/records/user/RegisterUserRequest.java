@@ -1,4 +1,4 @@
-package com.bnppf.bookstore_be.records;
+package com.bnppf.bookstore_be.records.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
