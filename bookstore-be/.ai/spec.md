@@ -32,7 +32,7 @@ This project is an enterprise-grade backend service for an Online Bookstore code
 
 ### Phase 2: Domain Model & Book Management (Read-Only Feature)
 * **Step 2.1:** Implement the `Book` entity with encapsulation, bean validations (`@NotBlank`, `@DecimalMin`, `@Min`), and `BookRepository`.
-* **Step 2.2:** Write failing integration tests (TDD) for catalog retrieval and implement `BookService` and `BookController` endpoints (`GET /api/books`).
+* **Step 2.2:** Write failing integration tests (TDD) for catalog retrieval and implement `BookService` and `BookController` endpoints (`GET /api/books`) and (`GET /api/books\{id}`).
 
 ### Phase 3: User Authentication & Management
 * **Step 3.1:** Create `User` entity and `UserRepository` for handling custom registration and login flows.

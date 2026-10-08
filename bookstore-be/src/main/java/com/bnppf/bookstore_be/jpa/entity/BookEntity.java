@@ -58,4 +58,21 @@ public class BookEntity {
     @Min(0)
     @Column(nullable = false)
     private Integer stock;
+
+    public BookEntity(
+            String title,
+            String author,
+            String isbn,
+            String category,
+            String description,
+            BigDecimal price,
+            Integer stock) {
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+        this.category = category;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+    }
 }
