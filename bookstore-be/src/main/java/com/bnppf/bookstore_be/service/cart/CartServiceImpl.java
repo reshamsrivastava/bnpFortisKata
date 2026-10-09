@@ -97,15 +97,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartResponse toResponse(CartEntity cart) {
-        List<CartItemResponse> items = cart.getItems().stream()
-                .map(item -> new CartItemResponse(
-                        item.getId(),
-                        item.getBook().getId(),
-                        item.getBook().getTitle(),
-                        item.getQuantity(),
-                        item.getUnitPrice(),
-                        item.getSubtotal()))
-                .toList();
+        List<CartItemResponse> items = cartRepository.findItemResponsesByCartId(cart.getId());
         BigDecimal total = items.stream()
                 .map(CartItemResponse::subtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

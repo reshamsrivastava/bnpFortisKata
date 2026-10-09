@@ -33,7 +33,7 @@ public class CartItemEntity {
     @JoinColumn(name = "cart_id", nullable = false)
     private CartEntity cart;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
     private BookEntity book;
 
