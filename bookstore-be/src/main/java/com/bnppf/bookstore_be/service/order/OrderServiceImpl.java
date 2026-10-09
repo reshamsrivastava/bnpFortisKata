@@ -13,16 +13,18 @@ import com.bnppf.bookstore_be.jpa.repository.CartRepository;
 import com.bnppf.bookstore_be.jpa.repository.OrderRepository;
 import com.bnppf.bookstore_be.records.order.OrderItemResponse;
 import com.bnppf.bookstore_be.records.order.OrderResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final CartRepository cartRepository;
@@ -40,6 +42,11 @@ public class OrderServiceImpl implements OrderService {
         var existingOrder = orderRepository
                 .findByUser_UsernameAndIdempotencyKey(username, idempotencyKey);
         if (existingOrder.isPresent()) {
+            log.atInfo()
+                    .addKeyValue("event", "order.checkout.replayed")
+                    .addKeyValue("username", username)
+                    .addKeyValue("orderId", existingOrder.get().getId())
+                    .log("Returning prior checkout result");
             return toResponse(existingOrder.get());
         }
 
@@ -75,6 +82,13 @@ public class OrderServiceImpl implements OrderService {
         order.complete();
         OrderEntity savedOrder = orderRepository.save(order);
         cart.clearItems();
+        log.atInfo()
+                .addKeyValue("event", "order.checkout.completed")
+                .addKeyValue("username", username)
+                .addKeyValue("orderId", savedOrder.getId())
+                .addKeyValue("itemCount", savedOrder.getItems().size())
+                .addKeyValue("total", savedOrder.getTotal())
+                .log("Checkout completed");
         return toResponse(savedOrder);
     }
 

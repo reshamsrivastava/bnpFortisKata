@@ -17,11 +17,13 @@ import com.bnppf.bookstore_be.records.cart.UpdateCartItemRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
@@ -52,7 +54,14 @@ public class CartServiceImpl implements CartService {
             existingItem.updateQuantity(newQuantity);
         }
 
-        return toResponse(cartRepository.save(cart));
+        CartEntity savedCart = cartRepository.save(cart);
+        log.atInfo()
+                .addKeyValue("event", "cart.item.added")
+                .addKeyValue("username", username)
+                .addKeyValue("bookId", book.getId())
+                .addKeyValue("quantity", newQuantity)
+                .log("Item added to cart");
+        return toResponse(savedCart);
     }
 
     @Override
