@@ -1,5 +1,6 @@
 package com.bnppf.bookstore_be.service.order;
 
+import com.bnppf.bookstore_be.constants.OrderConstraints;
 import com.bnppf.bookstore_be.exception.EmptyCartException;
 import com.bnppf.bookstore_be.exception.InsufficientBookStockException;
 import com.bnppf.bookstore_be.exception.InvalidIdempotencyKeyException;
@@ -94,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
 
     private void validateIdempotencyKey(String idempotencyKey) {
         if (idempotencyKey == null || idempotencyKey.isBlank()
-                || idempotencyKey.length() > 255) {
+                || idempotencyKey.length() > OrderConstraints.MAX_IDEMPOTENCY_KEY_LENGTH) {
             throw new InvalidIdempotencyKeyException();
         }
     }

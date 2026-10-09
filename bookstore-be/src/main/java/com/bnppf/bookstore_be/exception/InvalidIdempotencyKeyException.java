@@ -1,5 +1,6 @@
 package com.bnppf.bookstore_be.exception;
 
+import com.bnppf.bookstore_be.constants.OrderConstraints;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -7,6 +8,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class InvalidIdempotencyKeyException extends RuntimeException {
 
     public InvalidIdempotencyKeyException() {
-        super("Idempotency-Key must contain between 1 and 255 non-whitespace characters");
+        super(OrderConstraints.IDEMPOTENCY_KEY_HEADER
+                + " must contain between 1 and "
+                + OrderConstraints.MAX_IDEMPOTENCY_KEY_LENGTH
+                + " non-whitespace characters");
     }
 }

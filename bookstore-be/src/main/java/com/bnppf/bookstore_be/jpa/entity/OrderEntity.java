@@ -1,5 +1,6 @@
 package com.bnppf.bookstore_be.jpa.entity;
 
+import com.bnppf.bookstore_be.constants.OrderConstraints;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,7 +45,10 @@ public class OrderEntity {
     private UserEntity user;
 
     @NotBlank
-    @Column(name = "idempotency_key", nullable = false, length = 255)
+    @Column(
+            name = "idempotency_key",
+            nullable = false,
+            length = OrderConstraints.MAX_IDEMPOTENCY_KEY_LENGTH)
     private String idempotencyKey;
 
     @NotNull

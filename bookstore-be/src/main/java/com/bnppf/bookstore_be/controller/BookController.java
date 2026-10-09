@@ -1,6 +1,7 @@
 package com.bnppf.bookstore_be.controller;
 
 import com.bnppf.bookstore_be.jpa.entity.BookEntity;
+import com.bnppf.bookstore_be.records.book.BookResponse;
 import com.bnppf.bookstore_be.service.book.BookService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,24 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<BookEntity> getAllBooks() {
-        return bookService.getAllBooks();
+    public List<BookResponse> getAllBooks() {
+        return bookService.getAllBooks().stream().map(this::toResponse).toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookEntity> getBookById(@PathVariable Long id) {
-        return ResponseEntity.of(bookService.getBookById(id));
+    public ResponseEntity<BookResponse> getBookById(@PathVariable Long id) {
+        return ResponseEntity.of(bookService.getBookById(id).map(this::toResponse));
+    }
+
+    private BookResponse toResponse(BookEntity book) {
+        return new BookResponse(
+                book.getId(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getIsbn(),
+                book.getCategory(),
+                book.getDescription(),
+                book.getPrice(),
+                book.getStock());
     }
 }

@@ -1,5 +1,6 @@
 package com.bnppf.bookstore_be.jpa.entity;
 
+import com.bnppf.bookstore_be.constants.UserConstraints;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,18 +25,18 @@ public class UserEntity {
     private Long id;
 
     @NotBlank
-    @Size(min = 3, max = 50)
-    @Column(nullable = false, unique = true, length = 50)
+    @Size(min = UserConstraints.MIN_USERNAME_LENGTH, max = UserConstraints.MAX_USERNAME_LENGTH)
+    @Column(nullable = false, unique = true, length = UserConstraints.MAX_USERNAME_LENGTH)
     private String username;
 
     @NotBlank
     @Email
-    @Size(max = 254)
-    @Column(nullable = false, unique = true, length = 254)
+    @Size(max = UserConstraints.MAX_EMAIL_LENGTH)
+    @Column(nullable = false, unique = true, length = UserConstraints.MAX_EMAIL_LENGTH)
     private String email;
 
     @NotBlank
-    @Size(min = 8, max = 72)
+    @Size(min = UserConstraints.MIN_PASSWORD_LENGTH, max = UserConstraints.MAX_PASSWORD_LENGTH)
     @Column(name = "password", nullable = false)
     private String password;
 
