@@ -26,9 +26,10 @@ import org.springframework.test.web.servlet.MvcResult;
 @Sql(statements = {
         "DELETE FROM cart_items WHERE cart_id IN "
                 + "(SELECT c.id FROM carts c JOIN users u ON c.user_id = u.id "
-                + "WHERE u.username = 'resham')",
-        "DELETE FROM carts WHERE user_id IN (SELECT id FROM users WHERE username = 'resham')",
-        "DELETE FROM users WHERE username = 'resham'",
+                + "WHERE u.username IN ('resham', 'seconduser'))",
+        "DELETE FROM carts WHERE user_id IN "
+                + "(SELECT id FROM users WHERE username IN ('resham', 'seconduser'))",
+        "DELETE FROM users WHERE username IN ('resham', 'seconduser')",
         "DELETE FROM books WHERE isbn = '9780000000001'",
         "INSERT INTO books (id, title, author, isbn, category, description, price, stock) "
                 + "VALUES (99887766, 'Test Driven Development', 'Kent Beck', "
@@ -37,9 +38,10 @@ import org.springframework.test.web.servlet.MvcResult;
 @Sql(statements = {
         "DELETE FROM cart_items WHERE cart_id IN "
                 + "(SELECT c.id FROM carts c JOIN users u ON c.user_id = u.id "
-                + "WHERE u.username = 'resham')",
-        "DELETE FROM carts WHERE user_id IN (SELECT id FROM users WHERE username = 'resham')",
-        "DELETE FROM users WHERE username = 'resham'",
+                + "WHERE u.username IN ('resham', 'seconduser'))",
+        "DELETE FROM carts WHERE user_id IN "
+                + "(SELECT id FROM users WHERE username IN ('resham', 'seconduser'))",
+        "DELETE FROM users WHERE username IN ('resham', 'seconduser')",
         "DELETE FROM books WHERE isbn = '9780000000001'"
 }, executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class CartControllerIntegrationTest {
@@ -105,6 +107,54 @@ class CartControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isEmpty())
                 .andExpect(jsonPath("$.total").value(0));
+    }
+
+    @Test
+    void shouldOnlyExposeCartAndItemsToTheirOwner() throws Exception {
+        MvcResult addResult = mockMvc.perform(post("/api/cart/items")
+                        .header("Authorization", authorization)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"bookId": 99887766, "quantity": 1}
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        int itemId = JsonPath.read(addResult.getResponse().getContentAsString(), "$.items[0].id");
+
+        mockMvc.perform(post("/api/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "seconduser",
+                                  "email": "seconduser@example.com",
+                                  "password": "securePassword123"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+        String secondUserAuthorization = basicAuthorization("seconduser", "securePassword123");
+
+        mockMvc.perform(get("/api/cart").header("Authorization", secondUserAuthorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.total").value(0));
+
+        mockMvc.perform(put("/api/cart/items/{id}", itemId)
+                        .header("Authorization", secondUserAuthorization)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"quantity": 3}
+                                """))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(delete("/api/cart/items/{id}", itemId)
+                        .header("Authorization", secondUserAuthorization))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/cart").header("Authorization", authorization))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(itemId))
+                .andExpect(jsonPath("$.items[0].quantity").value(1));
     }
 
     @Test
