@@ -56,4 +56,8 @@ public class CartEntity {
     public void removeItem(CartItemEntity item) {
         items.remove(item);
     }
+
+    public void clearItems() {
+        items.clear();
+    }
 }

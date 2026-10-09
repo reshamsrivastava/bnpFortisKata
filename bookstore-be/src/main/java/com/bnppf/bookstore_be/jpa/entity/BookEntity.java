@@ -1,5 +1,6 @@
 package com.bnppf.bookstore_be.jpa.entity;
 
+import com.bnppf.bookstore_be.exception.InsufficientBookStockException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -74,5 +75,12 @@ public class BookEntity {
         this.description = description;
         this.price = price;
         this.stock = stock;
+    }
+
+    public void reduceStock(int quantity) {
+        if (quantity < 1 || quantity > stock) {
+            throw new InsufficientBookStockException(id);
+        }
+        stock -= quantity;
     }
 }

@@ -14,6 +14,10 @@ public interface CartRepository extends JpaRepository<CartEntity, Long> {
 
     Optional<CartEntity> findByUser_Username(String username);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select cart from CartEntity cart where cart.user.username = :username")
+    Optional<CartEntity> findByUser_UsernameForUpdate(@Param("username") String username);
+
     @Query("""
             select new com.bnppf.bookstore_be.records.cart.CartItemResponse(
                 item.id, book.id, book.title, item.quantity, item.unitPrice,

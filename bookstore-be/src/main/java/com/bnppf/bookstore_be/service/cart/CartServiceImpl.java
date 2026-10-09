@@ -37,7 +37,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse addItem(String username, AddCartItemRequest request) {
-        CartEntity cart = getOrCreateCart(username);
+        CartEntity cart = getOrCreateCartForUpdate(username);
         BookEntity book = bookRepository.findById(request.bookId())
                 .orElseThrow(() -> new BookNotFoundException(request.bookId()));
 
@@ -58,7 +58,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse updateItem(String username, Long itemId, UpdateCartItemRequest request) {
-        CartEntity cart = getOrCreateCart(username);
+        CartEntity cart = getOrCreateCartForUpdate(username);
         CartItemEntity item = findItem(cart, itemId);
         ensureStockAvailable(item.getBook(), request.quantity());
         item.updateQuantity(request.quantity());
@@ -68,19 +68,29 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse removeItem(String username, Long itemId) {
-        CartEntity cart = getOrCreateCart(username);
+        CartEntity cart = getOrCreateCartForUpdate(username);
         cart.removeItem(findItem(cart, itemId));
         return toResponse(cartRepository.save(cart));
     }
 
     private CartEntity getOrCreateCart(String username) {
         return cartRepository.findByUser_Username(username)
-                .orElseGet(() -> {
-                    UserEntity user = userRepository.findByUsername(username)
-                            .orElseThrow(() -> new IllegalStateException(
-                                    "Authenticated user was not found: " + username));
-                    return cartRepository.save(new CartEntity(user));
-                });
+                .orElseGet(() -> createCartAfterLockingUser(username, false));
+    }
+
+    private CartEntity getOrCreateCartForUpdate(String username) {
+        return cartRepository.findByUser_UsernameForUpdate(username)
+                .orElseGet(() -> createCartAfterLockingUser(username, true));
+    }
+
+    private CartEntity createCartAfterLockingUser(String username, boolean lockCart) {
+        UserEntity user = userRepository.findByUsernameForUpdate(username)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Authenticated user was not found: " + username));
+        return (lockCart
+                ? cartRepository.findByUser_UsernameForUpdate(username)
+                : cartRepository.findByUser_Username(username))
+                .orElseGet(() -> cartRepository.save(new CartEntity(user)));
     }
 
     private CartItemEntity findItem(CartEntity cart, Long itemId) {
