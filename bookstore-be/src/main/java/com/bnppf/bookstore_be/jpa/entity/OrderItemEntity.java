@@ -61,13 +61,18 @@ public class OrderItemEntity {
     }
 
     public OrderItemEntity(OrderEntity order, CartItemEntity cartItem, BookEntity book) {
+        this(order, book, cartItem.getQuantity(), cartItem.getUnitPrice());
+    }
+
+    public OrderItemEntity(
+            OrderEntity order, BookEntity book, Integer quantity, BigDecimal unitPrice) {
         this.order = order;
         this.bookId = book.getId();
         this.title = book.getTitle();
         this.author = book.getAuthor();
         this.isbn = book.getIsbn();
-        this.quantity = cartItem.getQuantity();
-        this.unitPrice = cartItem.getUnitPrice();
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
     }
 
     public BigDecimal getSubtotal() {

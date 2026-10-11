@@ -33,12 +33,18 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse getCart(String username) {
+        validateUsername(username);
         return toResponse(getOrCreateCart(username));
     }
 
     @Override
     @Transactional
     public CartResponse addItem(String username, AddCartItemRequest request) {
+        validateUsername(username);
+        if (request == null || request.bookId() == null || request.bookId() < 1) {
+            throw new IllegalArgumentException("Cart item request and book id are required");
+        }
+        validateQuantity(request.quantity());
         CartEntity cart = getOrCreateCartForUpdate(username);
         BookEntity book = bookRepository.findById(request.bookId())
                 .orElseThrow(() -> new BookNotFoundException(request.bookId()));
@@ -67,6 +73,11 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse updateItem(String username, Long itemId, UpdateCartItemRequest request) {
+        validateUsername(username);
+        if (itemId == null || request == null) {
+            throw new IllegalArgumentException("Cart item id and update request are required");
+        }
+        validateQuantity(request.quantity());
         CartEntity cart = getOrCreateCartForUpdate(username);
         CartItemEntity item = findItem(cart, itemId);
         ensureStockAvailable(item.getBook(), request.quantity());
@@ -77,6 +88,10 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse removeItem(String username, Long itemId) {
+        validateUsername(username);
+        if (itemId == null) {
+            throw new IllegalArgumentException("Cart item id must not be null");
+        }
         CartEntity cart = getOrCreateCartForUpdate(username);
         cart.removeItem(findItem(cart, itemId));
         return toResponse(cartRepository.save(cart));
@@ -104,7 +119,7 @@ public class CartServiceImpl implements CartService {
 
     private CartItemEntity findItem(CartEntity cart, Long itemId) {
         return cart.getItems().stream()
-                .filter(item -> item.getId().equals(itemId))
+                .filter(item -> itemId.equals(item.getId()))
                 .findFirst()
                 .orElseThrow(() -> new CartItemNotFoundException(itemId));
     }
@@ -112,6 +127,18 @@ public class CartServiceImpl implements CartService {
     private void ensureStockAvailable(BookEntity book, int quantity) {
         if (quantity > book.getStock()) {
             throw new InsufficientBookStockException(book.getId());
+        }
+    }
+
+    private void validateUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username must not be blank");
+        }
+    }
+
+    private void validateQuantity(Integer quantity) {
+        if (quantity == null || quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least one");
         }
     }
 

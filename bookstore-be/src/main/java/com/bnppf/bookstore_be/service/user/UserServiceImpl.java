@@ -20,6 +20,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse register(RegisterUserRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Registration request must not be null");
+        }
         if (userRepository.existsByUsername(request.username())
                 || userRepository.existsByEmail(request.email())) {
             throw new UserAlreadyExistsException();
@@ -35,6 +38,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUserByUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username must not be blank");
+        }
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Authenticated user was not found"));
         return toResponse(user);

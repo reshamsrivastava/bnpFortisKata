@@ -35,6 +35,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse checkout(String username, String idempotencyKey) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username must not be blank");
+        }
         validateIdempotencyKey(idempotencyKey);
 
         CartEntity cart = cartRepository.findByUser_UsernameForUpdate(username)
