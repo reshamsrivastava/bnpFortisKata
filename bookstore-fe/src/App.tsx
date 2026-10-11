@@ -5,10 +5,10 @@ import {
   Flex,
   Button,
   Text,
-  Callout,
 } from '@radix-ui/themes';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { GlobalErrorProvider } from './context/GlobalErrorContext';
 import { useCart } from './hooks/useCart';
 import { CartLauncher } from './components/Cart/CartLauncher';
 import { AuthView } from './components/Auth/AuthView';
@@ -40,7 +40,7 @@ function AuthenticatedBookstore({
   username: string;
   onLogout: () => void;
 }) {
-  const { addToCart, error } = useCart();
+  const { addToCart } = useCart();
 
   const handleAddToCart = (book: Book) => {
     void addToCart(book);
@@ -74,11 +74,6 @@ function AuthenticatedBookstore({
 
       <Box asChild>
         <main>
-          {error && (
-            <Callout.Root color="red" role="alert" mb="4">
-              <Callout.Text>{error}</Callout.Text>
-            </Callout.Root>
-          )}
           <BookList onAddToCart={handleAddToCart} />
         </main>
       </Box>
@@ -88,8 +83,10 @@ function AuthenticatedBookstore({
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BookstoreApp />
-    </AuthProvider>
+    <GlobalErrorProvider>
+      <AuthProvider>
+        <BookstoreApp />
+      </AuthProvider>
+    </GlobalErrorProvider>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { Card, Box, Heading, Text, TextField, Button, Flex, Callout } from '@radix-ui/themes';
+import { Card, Box, Heading, TextField, Button, Flex, Callout } from '@radix-ui/themes';
+import { apiFetch } from '../../api/api';
 import { type User, type AuthResponse } from '../../types/auth';
 
 interface AuthViewProps {
@@ -23,17 +24,13 @@ export function AuthView({ onAuthSuccess }: AuthViewProps) {
     const body = isRegister ? { username, email, password } : { username, password };
 
     try {
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Authentication failed');
-      }
 
       const authData = data as AuthResponse;
       onAuthSuccess({
@@ -41,8 +38,8 @@ export function AuthView({ onAuthSuccess }: AuthViewProps) {
         email: authData.email,
         token: authData.token,
       });
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

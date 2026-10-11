@@ -240,7 +240,9 @@ describe('CartView', () => {
 
     await user.click(screen.getByRole('button', { name: /checkout/i }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/checkout failed/i);
+    expect(
+      await within(screen.getByRole('dialog')).findByRole('alert'),
+    ).toHaveTextContent(/checkout failed/i);
     expect(screen.getByLabelText('Cart item count')).toHaveTextContent('2');
     expect(screen.getByRole('heading', { name: /order summary/i })).toBeInTheDocument();
 

@@ -7,6 +7,7 @@ import {
 } from 'react';
 import type { Book, CartItem } from '../types/bookstore';
 import type { OrderResponse } from '../types/order';
+import { apiFetch } from '../api/api';
 import { CartContext, type CartState } from './cart-context';
 
 const CART_API_URL = 'http://localhost:8080/api/cart';
@@ -95,27 +96,6 @@ function getBookId(bookId: string): number {
   return id;
 }
 
-async function readCartResponse(response: Response): Promise<ApiCart> {
-  if (!response.ok) {
-    let detail = '';
-    try {
-      const body: unknown = await response.json();
-      if (
-        typeof body === 'object' &&
-        body !== null &&
-        'message' in body &&
-        typeof body.message === 'string'
-      ) {
-        detail = ` ${body.message}`;
-      }
-    } catch {
-      // Some gateway errors return a non-JSON response.
-    }
-    throw new Error(`Cart request failed.${detail}`);
-  }
-  return (await response.json()) as ApiCart;
-}
-
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const stateRef = useRef(state);
@@ -131,8 +111,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    void fetch(CART_API_URL, { credentials: 'include' })
-      .then(readCartResponse)
+    void apiFetch(CART_API_URL)
+      .then((response) => response.json() as Promise<ApiCart>)
       .then((response) => {
         if (active) applyResponse(response);
       })
@@ -160,15 +140,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       send({ type: 'set-error', error: null });
       send({ type: 'set-items', items: optimisticItems });
       try {
-        const response = await readCartResponse(await request());
-        applyResponse(response);
+        const response = (await request()).json() as Promise<ApiCart>;
+        applyResponse(await response);
       } catch (error) {
         send({ type: 'set-items', items: previousItems });
         send({
           type: 'set-error',
           error:
             error instanceof Error
-              ? `${error.message} Please try again.`
+              ? `Cart request failed: ${error.message} Please try again.`
               : 'Unable to update your cart. Please try again.',
         });
       }
@@ -211,9 +191,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await mutate(
         optimisticItems,
         () =>
-          fetch(`${CART_API_URL}/items`, {
+          apiFetch(`${CART_API_URL}/items`, {
             method: 'POST',
-            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bookId, quantity: 1 }),
           }),
@@ -234,9 +213,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await mutate(
         previousItems.filter((cartItem) => cartItem.book.id !== bookId),
         () =>
-          fetch(`${CART_API_URL}/items/${encodeURIComponent(item.id)}`, {
+          apiFetch(`${CART_API_URL}/items/${encodeURIComponent(item.id)}`, {
             method: 'DELETE',
-            credentials: 'include',
           }),
         previousItems,
       );
@@ -266,9 +244,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           cartItem.book.id === bookId ? { ...cartItem, quantity } : cartItem,
         ),
         () =>
-          fetch(`${CART_API_URL}/items/${encodeURIComponent(item.id)}`, {
+          apiFetch(`${CART_API_URL}/items/${encodeURIComponent(item.id)}`, {
             method: 'PUT',
-            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ quantity }),
           }),
@@ -283,28 +260,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   ): Promise<OrderResponse | null> => {
     send({ type: 'set-error', error: null });
     try {
-      const response = await fetch(CHECKOUT_API_URL, {
+      const response = await apiFetch(CHECKOUT_API_URL, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Idempotency-Key': idempotencyKey },
       });
-      if (!response.ok) {
-        let message = 'Checkout failed.';
-        try {
-          const body: unknown = await response.json();
-          if (
-            typeof body === 'object' &&
-            body !== null &&
-            'message' in body &&
-            typeof body.message === 'string'
-          ) {
-            message = `Checkout failed. ${body.message}`;
-          }
-        } catch {
-          // Gateway errors may not return JSON.
-        }
-        throw new Error(message);
-      }
 
       const order = (await response.json()) as OrderResponse;
       send({ type: 'set-items', items: [] });
@@ -315,7 +274,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         type: 'set-error',
         error:
           error instanceof Error
-            ? `${error.message} Please try again.`
+            ? `Checkout failed: ${error.message} Please try again.`
             : 'Checkout failed. Please try again.',
       });
       return null;

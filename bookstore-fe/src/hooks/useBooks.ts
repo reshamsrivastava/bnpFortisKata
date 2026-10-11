@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api/api';
 import type { Book } from '../types/bookstore';
 
 interface UseBooksReturn {
@@ -17,12 +18,7 @@ export function useBooks(): UseBooksReturn {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch('http://localhost:8080/api/books', {
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      const res = await apiFetch('http://localhost:8080/api/books');
       const data: Book[] = await res.json();
       setBooks(data);
     } catch {

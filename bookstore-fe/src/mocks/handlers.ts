@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import type { LoginPayload, RegisterPayload } from '../types/auth';
 import type { Book } from '../types/bookstore';
 
 export const mockBooks: Book[] = [
@@ -21,13 +22,12 @@ export const mockBooks: Book[] = [
 ];
 
 export const handlers = [
-  // Example: Mocking a GET request to /api/user
-  http.get('/api/books', () => {
+  http.get('http://localhost:8080/api/books', () => {
     return HttpResponse.json(
       mockBooks, {status: 200});
   }),
 
-  http.post('/api/auth/login', async ({ request }) => {
+  http.post('http://localhost:8080/api/users/login', async ({ request }) => {
     const { username, password } = (await request.json()) as LoginPayload;
     if (password === 'wrongpassword') {
       return HttpResponse.json(
@@ -41,7 +41,7 @@ export const handlers = [
     );
   }),
 
-  http.post('/api/auth/register', async ({ request }) => {
+  http.post('http://localhost:8080/api/users/register', async ({ request }) => {
     const { username, email } = (await request.json()) as RegisterPayload;
     if (username === 'existinguser') {
       return HttpResponse.json(

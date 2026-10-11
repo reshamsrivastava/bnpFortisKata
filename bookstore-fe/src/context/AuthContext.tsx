@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { User } from '../types/auth';
 
 interface AuthContextType {
@@ -15,6 +21,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('auth_user');
     return saved ? JSON.parse(saved) : null;
   });
+
+  useEffect(() => {
+    const expireSession = () => {
+      setUser(null);
+      localStorage.removeItem('auth_user');
+    };
+    window.addEventListener('bookstore:unauthorized', expireSession);
+    return () => {
+      window.removeEventListener('bookstore:unauthorized', expireSession);
+    };
+  }, []);
 
   const login = (newUser: User) => {
     setUser(newUser);
