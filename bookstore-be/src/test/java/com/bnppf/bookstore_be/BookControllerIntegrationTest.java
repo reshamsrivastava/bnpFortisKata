@@ -4,10 +4,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,7 +32,7 @@ class BookControllerIntegrationTest {
 
     @Test
     void shouldReturnCatalogBooks() throws Exception {
-        mockMvc.perform(get("/api/books"))
+        mockMvc.perform(authenticated(get("/api/books")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.isbn == '9780000000001')]").isNotEmpty())
                 .andExpect(jsonPath("$[?(@.isbn == '9780000000001')].title")
@@ -40,7 +43,7 @@ class BookControllerIntegrationTest {
 
     @Test
     void shouldReturnBookById() throws Exception {
-        mockMvc.perform(get("/api/books/{id}", 987654321))
+        mockMvc.perform(authenticated(get("/api/books/{id}", 987654321)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(987654321))
                 .andExpect(jsonPath("$.isbn").value("9780000000001"))
@@ -50,7 +53,23 @@ class BookControllerIntegrationTest {
 
     @Test
     void shouldReturnNotFoundWhenBookIdDoesNotExist() throws Exception {
-        mockMvc.perform(get("/api/books/{id}", 987654322))
+        mockMvc.perform(authenticated(get("/api/books/{id}", 987654322)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldRequireAuthenticationForCatalogEndpoints() throws Exception {
+        mockMvc.perform(get("/api/books"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/api/books/{id}", 987654321))
+                .andExpect(status().isUnauthorized());
+    }
+
+    private MockHttpServletRequestBuilder authenticated(MockHttpServletRequestBuilder request) {
+        String credentials = "demo:DemoPassword123";
+        String authorization = "Basic " + Base64.getEncoder()
+                .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        return request.header("Authorization", authorization);
     }
 }

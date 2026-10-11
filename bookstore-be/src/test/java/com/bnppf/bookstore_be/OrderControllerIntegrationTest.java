@@ -114,7 +114,10 @@ class OrderControllerIntegrationTest {
                         "SELECT stock FROM books WHERE id = 99887767", Integer.class));
         assertEquals(
                 1, jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM customer_orders", Integer.class));
+                        "SELECT COUNT(*) FROM customer_orders o "
+                                + "JOIN users u ON o.user_id = u.id "
+                                + "WHERE u.username = 'orderuser'",
+                        Integer.class));
         mockMvc.perform(get("/api/cart").header("Authorization", authorization))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isEmpty());
@@ -181,7 +184,10 @@ class OrderControllerIntegrationTest {
                     0, jdbcTemplate.queryForObject(
                             "SELECT stock FROM books WHERE id = 99887767", Integer.class));
             assertEquals(1, jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM customer_orders", Integer.class));
+                    "SELECT COUNT(*) FROM customer_orders o "
+                            + "JOIN users u ON o.user_id = u.id "
+                            + "WHERE u.username IN ('orderuser', 'orderuser2')",
+                    Integer.class));
         } finally {
             executor.shutdownNow();
         }
