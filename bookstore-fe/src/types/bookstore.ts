@@ -8,6 +8,7 @@ export interface Book {
 }
 
 export interface CartItem {
+  id: string;
   book: Book;
   quantity: number;
 }

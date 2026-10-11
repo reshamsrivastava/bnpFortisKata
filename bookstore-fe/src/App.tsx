@@ -1,15 +1,22 @@
-import { Container, Heading, Box, Flex, Badge, Button, Text } from '@radix-ui/themes';
+import {
+  Container,
+  Heading,
+  Box,
+  Flex,
+  Button,
+  Text,
+  Callout,
+} from '@radix-ui/themes';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import { useCart } from './hooks/useCart';
+import { CartLauncher } from './components/Cart/CartLauncher';
 import { AuthView } from './components/Auth/AuthView';
 import { BookList } from './components/BookList/BookList';
 import type { Book } from './types/bookstore';
 
 function BookstoreApp() {
   const { user, isAuthenticated, login, logout } = useAuth();
-
-  const handleAddToCart = (book: Book) => {
-    console.log('Book added to cart:', book);
-  };
 
   if (!isAuthenticated) {
     return (
@@ -18,6 +25,26 @@ function BookstoreApp() {
       </Container>
     );
   }
+
+  return (
+    <CartProvider>
+      <AuthenticatedBookstore username={user?.username ?? ''} onLogout={logout} />
+    </CartProvider>
+  );
+}
+
+function AuthenticatedBookstore({
+  username,
+  onLogout,
+}: {
+  username: string;
+  onLogout: () => void;
+}) {
+  const { addToCart, error } = useCart();
+
+  const handleAddToCart = (book: Book) => {
+    void addToCart(book);
+  };
 
   return (
     <Container size="3" p="4" style={{ maxWidth: '960px', margin: '0 auto' }}>
@@ -33,15 +60,13 @@ function BookstoreApp() {
             Online Bookstore
           </Heading>
           <Text size="2" style={{ color: '#94a3b8' }}>
-            Logged in as <strong>{user?.username}</strong>
+            Logged in as <strong>{username}</strong>
           </Text>
         </Box>
 
         <Flex align="center" gap="3">
-          <Badge size="2" color="indigo" variant="soft" style={{ padding: '6px 12px' }}>
-            Cart (0)
-          </Badge>
-          <Button variant="outline" color="gray" size="2" onClick={logout} style={{ cursor: 'pointer' }}>
+          <CartLauncher />
+          <Button variant="outline" color="gray" size="2" onClick={onLogout} style={{ cursor: 'pointer' }}>
             Logout
           </Button>
         </Flex>
@@ -49,6 +74,11 @@ function BookstoreApp() {
 
       <Box asChild>
         <main>
+          {error && (
+            <Callout.Root color="red" role="alert" mb="4">
+              <Callout.Text>{error}</Callout.Text>
+            </Callout.Root>
+          )}
           <BookList onAddToCart={handleAddToCart} />
         </main>
       </Box>
