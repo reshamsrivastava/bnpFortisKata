@@ -1,0 +1,128 @@
+{
+  "books": [
+    {
+      "title": "The Pragmatic Programmer",
+      "author": "David Thomas and Andrew Hunt",
+      "isbn": "9780135957059",
+      "category": "Software Engineering",
+      "description": "Practical advice for building better software and becoming a better programmer.",
+      "price": 39.99,
+      "stock": 12
+    },
+    {
+      "title": "Clean Code",
+      "author": "Robert C. Martin",
+      "isbn": "9780132350884",
+      "category": "Software Engineering",
+      "description": "A handbook of agile software craftsmanship.",
+      "price": 34.99,
+      "stock": 10
+    },
+    {
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "isbn": "9780547928227",
+      "category": "Fantasy",
+      "description": "A classic fantasy adventure through Middle-earth.",
+      "price": 18.50,
+      "stock": 20
+    },
+    {
+      "title": "The Left Hand of Darkness",
+      "author": "Ursula K. Le Guin",
+      "isbn": "9780441478125",
+      "category": "Science Fiction",
+      "description": "A science fiction novel exploring culture, identity, and politics.",
+      "price": 16.99,
+      "stock": 8
+    },
+    {
+      "title": "The Name of the Wind",
+      "author": "Patrick Rothfuss",
+      "isbn": "9780756404741",
+      "category": "Fantasy",
+      "description": "A gifted young man recounts his journey from a traveling troupe to a legendary university.",
+      "price": 22.99,
+      "stock": 14
+    },
+    {
+      "title": "Dune",
+      "author": "Frank Herbert",
+      "isbn": "9780441172719",
+      "category": "Science Fiction",
+      "description": "A young nobleman navigates political intrigue and survival on the desert planet Arrakis.",
+      "price": 19.99,
+      "stock": 16
+    },
+    {
+      "title": "The Silent Patient",
+      "author": "Alex Michaelides",
+      "isbn": "9781250301697",
+      "category": "Mystery",
+      "description": "A criminal psychotherapist investigates why a painter stopped speaking after a shocking crime.",
+      "price": 17.99,
+      "stock": 11
+    },
+    {
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "isbn": "9780374533557",
+      "category": "Psychology",
+      "description": "An exploration of the two systems that shape human thought, judgment, and decision-making.",
+      "price": 21.50,
+      "stock": 9
+    },
+    {
+      "title": "The Design of Everyday Things",
+      "author": "Don Norman",
+      "isbn": "9780465050659",
+      "category": "Design",
+      "description": "A practical guide to designing products that are understandable, usable, and intuitive.",
+      "price": 24.99,
+      "stock": 7
+    },
+    {
+      "title": "The Very Hungry Caterpillar",
+      "author": "Eric Carle",
+      "isbn": "9780399226908",
+      "category": "Children",
+      "description": "A colorful picture book follows a caterpillar as it eats its way toward becoming a butterfly.",
+      "price": 12.99,
+      "stock": 18
+    }
+  ],
+  "user": {
+    "username": "demo",
+    "email": "demo@bookstore.com",
+    "password": "DemoPassword123"
+  },
+  "cart": {
+    "items": [
+      {
+        "isbn": "9780135957059",
+        "quantity": 1
+      },
+      {
+        "isbn": "9780547928227",
+        "quantity": 2
+      }
+    ]
+  },
+  "orders": [
+    {
+      "idempotencyKey": "demo-order-2026-001",
+      "items": [
+        {
+          "isbn": "9780132350884",
+          "quantity": 1,
+          "unitPrice": 32.99
+        },
+        {
+          "isbn": "9780441478125",
+          "quantity": 2,
+          "unitPrice": 16.99
+        }
+      ]
+    }
+  ]
+}

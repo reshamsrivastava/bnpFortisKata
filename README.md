@@ -1,24 +1,113 @@
 # Online Bookstore
-## BNP Paribas Fortis - KATA assessment
 
-An online books system, implemented using spring boot, H2, and JPA as the backend, react and react-bootstrap as the front end. Contains functions such as books and authors. 
+**BNP Paribas Fortis — KATA assessment**
 
-## Getting started
+A full-stack bookstore application built with a Spring Boot REST API and a
+React + TypeScript frontend. Browse books, manage a cart, and check out with
+stock-safe order processing and idempotent requests.
 
-To get the backend running locally:
+## Contents
 
-- Clone this repo via : https://github.com/reshamsrivastava/bnpFortisKata.git
-- `cd bookstore-be` 
-- `./mvnw spring-boot:run`
-- Or Run using IDEs like Intellij Idea
-- swagger : http://localhost:8080/swagger-ui/index.html
-- h2-console: http://localhost:8080/h2-console/login.do
-- h2 credentials are present application-local.properties
+- [Technology](#technology)
+- [Prerequisites](#prerequisites)
+- [Run locally](#run-locally)
+- [Demo account](#demo-account)
+- [Build and test](#build-and-test)
+- [Project structure](#project-structure)
+- [Local development](#local-development)
 
-To get the frontend running locally:
-- `cd bookstore-fe`
-- `npm install` to install all req'd dependencies
-- `npm test` to test
-- `npm run dev` to start the local server (this project uses create-react-app)
-- Bookstore: http://localhost:8081/
+## Technology
 
+| Area | Stack |
+| --- | --- |
+| Backend | Java 17, Spring Boot, Spring Security, Spring Data JPA |
+| Database | H2 in-memory |
+| Frontend | React, TypeScript, Vite, Radix UI |
+| Backend build | Maven Wrapper |
+| Frontend tooling | Node.js and npm |
+
+## Prerequisites
+
+- Java 17 or later
+- Node.js 20.19+ or 22.12+ and npm
+- Git (optional, for cloning)
+
+The backend includes the Maven Wrapper, so a separate Maven installation is
+not required.
+
+## Run locally
+
+Clone the repository and open two terminals from its root directory.
+
+### Start the backend
+
+```bash
+cd bookstore-be
+./mvnw spring-boot:run
+```
+
+The API starts at <http://localhost:8080>. The default `local` profile creates
+an in-memory H2 database and loads sample books, a demo user, cart, and order.
+
+### Start the frontend
+
+```bash
+cd bookstore-fe
+npm install
+npm run dev
+```
+
+Open <http://localhost:8081>. Vite proxies `/api` requests to the backend on
+port `8080`.
+
+## Demo account
+
+| Username | Password |
+| --- | --- |
+| `demo` | `DemoPassword123` |
+
+This account is for local development only. Do not use these credentials in a
+deployed environment.
+
+## Build and test
+
+### Backend
+
+```bash
+cd bookstore-be
+./mvnw test
+./mvnw clean verify
+```
+
+### Frontend
+
+```bash
+cd bookstore-fe
+npm run test:run
+npm run build
+npm run lint
+```
+
+To generate frontend test coverage, run `npm run test:coverage`.
+
+## Project structure
+
+```text
+.
+├── bookstore-be/    Spring Boot API, persistence, and backend tests
+└── bookstore-fe/    React + TypeScript frontend
+```
+
+## Local development
+
+- H2 data is in-memory and is recreated when the backend restarts.
+- The H2 console is available at <http://localhost:8080/h2-console>. The JDBC
+  URL and credentials are configured in
+  `bookstore-be/src/main/resources/application-local.properties`.
+- Swagger UI is available at <http://localhost:8080/swagger-ui/index.html>;
+  the OpenAPI document is at <http://localhost:8080/v3/api-docs>.
+- CORS is configured for the frontend origin `http://localhost:8081`.
+- Backend logs are written to the console and configured rolling log file.
+
+For frontend-specific setup, scripts, and testing notes, see
+[`bookstore-fe/README.md`](bookstore-fe/README.md).
