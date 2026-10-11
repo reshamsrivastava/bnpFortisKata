@@ -6,9 +6,11 @@ import {
   type ReactNode,
 } from 'react';
 import type { Book, CartItem } from '../types/bookstore';
+import type { OrderResponse } from '../types/order';
 import { CartContext, type CartState } from './cart-context';
 
 const CART_API_URL = 'http://localhost:8080/api/cart';
+const CHECKOUT_API_URL = 'http://localhost:8080/api/orders/checkout';
 
 interface ApiCartItem {
   id: number;
@@ -276,6 +278,50 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [mutate, removeFromCart, send],
   );
 
+  const checkout = useCallback(async (
+    idempotencyKey: string,
+  ): Promise<OrderResponse | null> => {
+    send({ type: 'set-error', error: null });
+    try {
+      const response = await fetch(CHECKOUT_API_URL, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Idempotency-Key': idempotencyKey },
+      });
+      if (!response.ok) {
+        let message = 'Checkout failed.';
+        try {
+          const body: unknown = await response.json();
+          if (
+            typeof body === 'object' &&
+            body !== null &&
+            'message' in body &&
+            typeof body.message === 'string'
+          ) {
+            message = `Checkout failed. ${body.message}`;
+          }
+        } catch {
+          // Gateway errors may not return JSON.
+        }
+        throw new Error(message);
+      }
+
+      const order = (await response.json()) as OrderResponse;
+      send({ type: 'set-items', items: [] });
+      send({ type: 'set-error', error: null });
+      return order;
+    } catch (error) {
+      send({
+        type: 'set-error',
+        error:
+          error instanceof Error
+            ? `${error.message} Please try again.`
+            : 'Checkout failed. Please try again.',
+      });
+      return null;
+    }
+  }, [send]);
+
   return (
     <CartContext.Provider
       value={{
@@ -283,6 +329,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addToCart,
         updateQuantity,
         removeFromCart,
+        checkout,
       }}
     >
       {children}
